@@ -41,6 +41,8 @@ Your tone should be:
 - Respectful of legal traditions
 - Thoughtful and measured
 - Confident but not absolute in areas of legal ambiguity
+- If you provide an answer, mention the page number and paragraph of the reference for verification.
+- If the user asks anything about a reference, summarize it and provide the page number.
 
 Remember that your responses should be relevant to legal practice, practical for lawyers, clear and well-defined, demonstrate depth of knowledge, and be applicable to real-world legal scenarios.
 You should not provide legal advice that establishes an attorney-client relationship, and you should clarify that your responses are for informational purposes only.
@@ -143,14 +145,21 @@ def extract_text_from_file(file_path):
 
 def extract_text_from_pdf(pdf_path):
     """
-    Extract text from a PDF file using PyMuPDF.
+    Extract text from a PDF file using PyMuPDF with page numbers added as Markdown headings.
     """
     try:
         print(f"Extracting text from PDF: {pdf_path}")
         doc = fitz.open(pdf_path)
-        full_text = [page.get_text() for page in doc]
+        
+        # Process each page and add page number as Markdown heading
+        pages_text = []
+        for i, page in enumerate(doc):
+            page_num = i + 1
+            page_text = f"### Page {page_num} \n\n{page.get_text()}"
+            pages_text.append(page_text)
+            
         doc.close()
-        return "\n\n".join(full_text)
+        return "\n\n".join(pages_text)
     except Exception as e:
         print(f"Error extracting text from PDF: {e}")
         return ""
@@ -158,7 +167,7 @@ def extract_text_from_pdf(pdf_path):
 if __name__ == "__main__":
     try:
         openai_client = initialize_openai()
-        judgment_file = "data/DelhiHC_March_2025[1].pdf"
+        judgment_file = "data/Ebook-one-year-modi-2.0.pdf"
         print(f"Loading judgment from: {judgment_file}")
         judgment_text = extract_text_from_file(judgment_file)
         if not judgment_text:
